@@ -104,7 +104,7 @@ method_body:
     statement_list ;
 
 statement_list:
-    statement_list statement | statement ;
+    statement_list statement | statement | statement iteration_statement | statement_list iteration_statement ;
 
 statement:
     variable_declaration | expression_statement | compound_statement | selection_statement | iteration_statement | jump_statement | method_call | method_declaration | expression_statement iteration_statement ;
@@ -161,16 +161,48 @@ primary_expression:
     T_ID | T_INT | T_DOUBLE | T_CHAR | T_STRING_LITERAL | T_NZNUMBER | method_call | T_LPAREN expression T_RPAREN | T_LPAREN type T_RPAREN primary_expression ;
 
 method_call:
-    T_OUTPRINTLN T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINT T_LPAREN primary_expression T_RPAREN T_SEMI ;
+    T_OUTPRINTLN T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINT T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINTLN T_LPAREN primary_expression T_COMMA T_ID T_RPAREN T_SEMI | T_OUTPRINTLN T_LPAREN primary_expression T_COMMA T_STRING_LITERAL T_RPAREN T_SEMI ;
 
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Error: %s\n", s);
+    if (s != NULL) {
+        fprintf(stderr, "Error: %s at line %d\n", s, yylineno);
+    }
+    else {
+        fprintf(stderr, "The input is correct");
+    }
 }
 
 /*Main*/
 int main(int argc, char* argv[]) {
+    FILE *input;
+
+    // Check if an input file argument is provided
+    if (argc > 1) {
+        input = fopen(argv[1], "r");
+        if (!input) {
+            fprintf(stderr, "Error opening file: %s\n", argv[1]);
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        fprintf(stderr, "Usage: %s <input>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    // Print the contents of input.txt to the screen
+    int c;
+    while ((c = fgetc(input)) != EOF) {
+        putchar(c);
+    }
+
+    // Set yyin to read from the input file
+    yyin = input;
+
+    // Close the input file after reading
+    fclose(input);
+
+    
 	FILE *a;
 	++argv; --argc;
 	if (argc>0)
@@ -182,9 +214,12 @@ int main(int argc, char* argv[]) {
 		}
 		yyin = a;
 	}
-	else
-		yyin = stdin;
-		yyout = fopen("output", "w");
-		yyparse();
-	return 0;
+	else {
+        yyin = stdin;
+    }
+    yyout = fopen("output", "w");
+    yyparse();
+    fclose(yyout);
+    fclose(yyin);
+    return 0;
 }
