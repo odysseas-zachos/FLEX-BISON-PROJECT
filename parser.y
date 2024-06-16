@@ -65,8 +65,8 @@ extern FILE *yyout;
 %token T_LBRACE
 %token T_RBRACE
 %token T_EOF
-
-
+%token T_STRING_LITERAL
+%token T_NZNUMBER
 
 
 %start program
@@ -86,7 +86,7 @@ declaration:
     variable_declaration | method_declaration ;
 
 variable_declaration:
-    type T_ID T_SEMI ;
+    type T_ID T_SEMI | type T_ID T_ASSIGN expression T_SEMI | type T_ID T_RELOP expression T_SEMI ;
 
 type:
     T_INT | T_CHAR | T_DOUBLE | T_BOOLEAN | T_STRING ;
@@ -107,7 +107,7 @@ statement_list:
     statement_list statement | statement ;
 
 statement:
-    variable_declaration | expression_statement | compound_statement | selection_statement | iteration_statement | jump_statement ;
+    variable_declaration | expression_statement | compound_statement | selection_statement | iteration_statement | jump_statement | method_call | method_declaration | expression_statement iteration_statement ;
 
 expression_statement:
     expression T_SEMI ;
@@ -119,16 +119,22 @@ selection_statement:
     T_IF T_LPAREN expression T_RPAREN statement | T_IF T_LPAREN expression T_RPAREN statement T_ELSE statement ;
 
 iteration_statement:
-    T_WHILE T_LPAREN expression T_RPAREN statement | T_DO statement T_WHILE T_LPAREN expression T_RPAREN T_SEMI | T_FOR T_LPAREN expression_statement expression_statement T_RPAREN statement ;
+    T_WHILE T_LPAREN expression T_RPAREN statement | T_DO statement T_WHILE T_LPAREN expression T_RPAREN T_SEMI | T_FOR T_LPAREN expression_statement expression_statement T_RPAREN statement 
+    | T_FOR T_LPAREN expression_statement expression_statement expression_statement T_RPAREN iteration_block ;
+
+iteration_block:
+    statement
+    | compound_statement /* Handle { ... } block */
+    ;
 
 jump_statement:
     T_BREAK T_SEMI | T_RETURN expression T_SEMI | T_RETURN T_SEMI ;
 
 expression:
-    assignment_expression ;
+    assignment_expression  | additive_expression | primary_expression ;
 
 assignment_expression:
-    logical_or_expression | T_ID T_ASSIGN assignment_expression ;
+    logical_or_expression | T_ID T_ASSIGN assignment_expression | T_ID T_ASSIGN logical_or_expression | additive_expression ;
 
 logical_or_expression:
     logical_and_expression | logical_or_expression T_OROP logical_and_expression ;
@@ -137,10 +143,10 @@ logical_and_expression:
     equality_expression | logical_and_expression T_ANDOP equality_expression ;
 
 equality_expression:
-    relational_expression | equality_expression T_EQUOP relational_expression | equality_expression T_EQUOP relational_expression ;
+    relational_expression | equality_expression T_EQUOP relational_expression | equality_expression T_EQUOP relational_expression  ;
 
 relational_expression:
-    additive_expression | relational_expression T_EQUOP additive_expression | relational_expression T_EQUOP additive_expression ;
+    additive_expression | relational_expression T_RELOP additive_expression | relational_expression T_RELOP additive_expression ;
 
 additive_expression:
     multiplicative_expression | additive_expression T_ADDOP multiplicative_expression | additive_expression T_ADDOP multiplicative_expression ;
@@ -152,7 +158,7 @@ unary_expression:
     primary_expression | T_NOTOP unary_expression ;
 
 primary_expression:
-    T_ID | T_INT | T_DOUBLE | T_CHAR | T_STRING | method_call | T_LPAREN expression T_RPAREN ;
+    T_ID | T_INT | T_DOUBLE | T_CHAR | T_STRING_LITERAL | T_NZNUMBER | method_call | T_LPAREN expression T_RPAREN | T_LPAREN type T_RPAREN primary_expression ;
 
 method_call:
     T_OUTPRINTLN T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINT T_LPAREN primary_expression T_RPAREN T_SEMI ;

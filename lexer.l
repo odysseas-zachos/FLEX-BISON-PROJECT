@@ -21,9 +21,10 @@ ESC_CHARS \\["\\bfnrt/]
 LETTER      [a-zA-Z]
 DIGIT       [0-9]
 CHARACTER   {LETTER}|{DIGIT}
-NZNUMBER    [1-9]{DIGIT}*|0    /*AKERAIOS ARITHMOS */ 
-
+NZNUMBER    [1-9]{DIGIT}*|0   
+CHAR        {ALL_CHARS}|{ESC_CHARS}|{LETTER}
 ID          _?{LETTER}({LETTER}|{DIGIT}|_)*
+CHARS_A     {CHAR}+
 ICONST      {NZNUMBER}
 FCONST      {NZNUMBER}\.{DIGIT}*
 CCONST      \'.\'
@@ -60,6 +61,8 @@ WHITESPACE  [ \t]
 
 {ID}                { printf("\nID -> %s\n", yytext); return T_ID; }
 
+{NZNUMBER}          { printf("\nNZNUMBER -> %s\n", yytext); return T_NZNUMBER; }
+
 {CCONST}            { printf("\nCCONST -> %s\n", yytext); return T_CCONST; }
 
 "||"                { printf("\nOROP\n"); return T_OROP; }
@@ -87,7 +90,7 @@ WHITESPACE  [ \t]
 \n                  { /* Ignore newlines */ lineno++; /* Optionally increment yylineno */ }
 <<EOF>>             { printf("\nEOF\n"); return T_EOF; }
 .                   { error_count++; }
-
+\"({CHARS_A})*\"       { printf("\nSTRINGLITERAL -> %s\n", yytext); return T_STRING_LITERAL; }
 
 
 %%
