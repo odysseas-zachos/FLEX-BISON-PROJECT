@@ -16,6 +16,8 @@ int error_count = 0;
 %option yylineno
 %option noyywrap
 
+ALL_CHARS [ -!#-\[\]-~]
+ESC_CHARS \\["\\bfnrt/]
 LETTER      [a-zA-Z]
 DIGIT       [0-9]
 CHARACTER   {LETTER}|{DIGIT}
@@ -73,6 +75,7 @@ WHITESPACE  [ \t]
 ")"                 { printf("\nRPAREN\n"); return T_RPAREN; }
 ";"                 { printf("\nSEMI\n"); return T_SEMI; }
 ","                 { printf("\nCOMMA\n"); return T_COMMA; }
+
 "="                 { printf("\nASSIGN\n"); return T_ASSIGN; }
 "["                 { printf("\nLBRACK\n"); return T_LBRACK; }
 "]"                 { printf("\nRBRACK\n"); return T_RBRACK; }
@@ -81,9 +84,10 @@ WHITESPACE  [ \t]
 "}"                 { printf("\nRBRACE\n"); return T_RBRACE; }
 
 {WHITESPACE}        { /* Κενά (space) μέσα στο αρχείο - απλά τα αγνοούμε */ }
-\n                  { lineno++; /* Εναλλακτικά βασιζόμαστε στο Flex να αυξήσει την μεταβλητή 'yylineno' κατά 1 ΑΥΤΟΜΑΤΑ */ }
+\n                  { /* Ignore newlines */ lineno++; /* Optionally increment yylineno */ }
 <<EOF>>             { printf("\nEOF\n"); return T_EOF; }
-.                   { error_count++; printf("\nUnrecognised character at line %d!\n", yylineno); }
+.                   { error_count++; }
+
 
 
 %%
