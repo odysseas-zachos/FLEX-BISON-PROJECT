@@ -73,6 +73,7 @@ WHITESPACE  [ \t]
 "*"|"/"|"%"         { printf("\nMULOP -> %s\n", yytext); return T_MULOP; }
 "!"                 { printf("\nNOTOP\n"); return T_NOTOP; }
 "++"|"--"           { printf("\nINCDEC -> %s\n", yytext); return T_INCDEC; }
+"."                 { printf("\nT_DOT\n"); return T_DOT; }
 
 "("                 { printf("\nLPAREN\n"); return T_LPAREN; }
 ")"                 { printf("\nRPAREN\n"); return T_RPAREN; }

@@ -67,17 +67,18 @@ extern FILE *yyout;
 %token T_EOF
 %token T_STRING_LITERAL
 %token T_NZNUMBER
-
+%token T_DOT
 
 %start program
 
 %%
 
-program:
-    class_declaration;
+program:  /* ALLAGI */
+    class_declaration | class_declaration class_declaration | class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration | class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration class_declaration ;
 
 class_declaration:
-    T_PUBLIC T_CLASS T_ID T_LBRACE class_body T_RBRACE | T_PRIVATE T_CLASS T_ID T_LBRACE class_body T_RBRACE ;
+    T_PUBLIC T_CLASS T_ID T_LBRACE class_body T_RBRACE | T_PRIVATE T_CLASS T_ID T_LBRACE class_body T_RBRACE | T_PUBLIC T_CLASS T_ID T_LBRACE class_body class_declaration T_RBRACE  ;
+
 
 class_body:
     class_body declaration | declaration ;
@@ -86,10 +87,13 @@ declaration:
     variable_declaration | method_declaration ;
 
 variable_declaration:
-    type T_ID T_SEMI | type T_ID T_ASSIGN expression T_SEMI | type T_ID T_RELOP expression T_SEMI ;
+    type T_ID T_SEMI | type T_ID T_ASSIGN expression T_SEMI | type T_ID T_RELOP expression T_SEMI | T_ID T_ID T_ASSIGN object_creation T_SEMI | modifier type T_ID T_SEMI | modifier type T_ID T_ASSIGN T_STRING_LITERAL T_SEMI ;
 
 type:
-    T_INT | T_CHAR | T_DOUBLE | T_BOOLEAN | T_STRING ;
+    T_INT | T_CHAR | T_DOUBLE | T_BOOLEAN | T_STRING | type T_LBRACK T_RBRACK;
+
+modifier: /* ALLAGI */ 
+    T_PRIVATE ;
 
 method_declaration:
     T_PUBLIC T_VOID T_ID T_LPAREN parameter_list T_RPAREN T_LBRACE method_body T_RBRACE | T_PUBLIC type T_ID T_LPAREN parameter_list T_RPAREN T_LBRACE method_body T_RBRACE ;
@@ -110,7 +114,7 @@ statement:
     variable_declaration | expression_statement | compound_statement | selection_statement | iteration_statement | jump_statement | method_call | method_declaration | expression_statement iteration_statement ;
 
 expression_statement:
-    expression T_SEMI ;
+    expression T_SEMI | expression ;
 
 compound_statement:
     T_LBRACE statement_list T_RBRACE ;
@@ -158,10 +162,18 @@ unary_expression:
     primary_expression | T_NOTOP unary_expression ;
 
 primary_expression:
-    T_ID | T_INT | T_DOUBLE | T_CHAR | T_STRING_LITERAL | T_NZNUMBER | method_call | T_LPAREN expression T_RPAREN | T_LPAREN type T_RPAREN primary_expression ;
+    T_ID | T_INT | T_DOUBLE | T_CHAR | T_STRING_LITERAL | T_NZNUMBER | method_call | T_LPAREN expression T_RPAREN | T_LPAREN type T_RPAREN primary_expression | object_creation | T_INCDEC ;
+
+object_creation:
+    T_NEW T_ID T_LPAREN T_RPAREN | T_NEW T_ID T_LPAREN argument_list T_RPAREN; 
+
+argument_list:
+    expression 
+    | argument_list T_COMMA expression;
 
 method_call:
-    T_OUTPRINTLN T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINT T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINTLN T_LPAREN primary_expression T_COMMA T_ID T_RPAREN T_SEMI | T_OUTPRINTLN T_LPAREN primary_expression T_COMMA T_STRING_LITERAL T_RPAREN T_SEMI ;
+    T_OUTPRINTLN T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINT T_LPAREN primary_expression T_RPAREN T_SEMI | T_OUTPRINTLN T_LPAREN primary_expression T_COMMA T_ID T_RPAREN T_SEMI | T_OUTPRINTLN T_LPAREN primary_expression T_COMMA T_STRING_LITERAL T_RPAREN T_SEMI | T_ID T_DOT T_ID T_LPAREN T_RPAREN T_SEMI 
+    | T_ID T_DOT T_ID T_LPAREN argument_list T_RPAREN T_SEMI; 
 
 %%
 
